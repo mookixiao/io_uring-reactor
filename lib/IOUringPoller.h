@@ -9,6 +9,7 @@
 
 #include "Types.h"
 
+class Channel;
 class EventLoop;
 
 class IOUringPoller {
@@ -18,12 +19,13 @@ public:
 
     void poll(ChannelList& activeChannels);
 
+    void updateChannel(Channel *channel);
+
 private:
 
     EventLoop* ownerLoop_;
 
     struct io_uring ring;
-    struct io_uring_cqe* cqe;
 };
 
 

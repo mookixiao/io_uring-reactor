@@ -7,9 +7,9 @@
 
 #include <memory>
 
-#include "Channel.h"
 #include "Types.h"
 
+class Channel;
 class IOUringPoller;
 
 class EventLoop {
@@ -18,6 +18,8 @@ public:
     ~EventLoop();
 
     void poll();
+
+    void updateChannel(Channel *channel);
 
 private:
     // IOUringPoller
