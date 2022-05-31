@@ -14,12 +14,16 @@
 
 class Acceptor {
 public:
-    explicit Acceptor(int port, struct io_uring &ring);
+    explicit Acceptor(EventLoop *loop, struct io_uring *ring, int port);
 
     void listen();
 
+    void setNewConnectionCallback(const NewConnectionCallback &cb) { newConnectionCallback = cb; };
+
 private:
     void handleNewConnection();  // 接受新连接
+
+    EventLoop *ownerLoop_;
 
     int acceptSocket_;
     struct io_uring ring_;
@@ -27,7 +31,8 @@ private:
 
     struct sockaddr_in clientAddr;
     socklen_t clientAddrLen;
-//    NewConnectionCallback newConnectionCallback;
+
+    NewConnectionCallback newConnectionCallback;
 };
 
 

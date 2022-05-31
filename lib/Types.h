@@ -6,14 +6,19 @@
 #define IO_URING_REACTOR_TYPES_H
 
 #include <functional>
+#include <map>
+#include <string>
 #include <vector>
 
 #include <sys/uio.h>
 
 class Channel;
+class TcpConnection;
 
 // Class
+typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 typedef std::vector<Channel *> ChannelList;
+typedef std::map<std::string, TcpConnectionPtr> ConnectionMap;  // TcpConnection名字 <-> TcpConnectionPtr
 
 // Events
 const int kReadEvent = 0x01;
@@ -21,11 +26,14 @@ const int kWriteEvent = 0x02;
 const int kCloseEvent = 0x04;
 
 // Func
-typedef std::function<void()> NewConnectionCallback;
+typedef std::function<void(int sockfd, struct sockaddr_in &)> NewConnectionCallback;
 
-typedef std::function<void()> AcceptCallback;
+typedef std::function<void()> ConnectionCallback;
+typedef std::function<void()> MessageCallback;
 
-typedef std::function<void()> ReadCallback;
+typedef std::function<void()> AcceptCallback;  // 用于监听Channel
+
+typedef std::function<void()> ReadCallback;  // 用于普通Channel
 typedef std::function<void()> WriteCallback;
 typedef std::function<void()> CloseCallback;
 

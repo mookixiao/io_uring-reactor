@@ -10,9 +10,10 @@
 
 #include "Limits.h"
 
-Acceptor::Acceptor(int port, struct io_uring &ring)
-        : ring_(ring),
-        acceptChannel_(ring_),
+Acceptor::Acceptor(EventLoop *loop, struct io_uring &ring, int port)
+        : ownerLoop_(loop),
+        ring_(ring),
+        acceptChannel_(ownerLoop_, ring_),
         clientAddrLen(sizeof clientAddr)
 {
     // 监听套接字
@@ -36,8 +37,7 @@ Acceptor::Acceptor(int port, struct io_uring &ring)
     }
 
     // Channel
-    acceptChannel_.setReadCallback(std::bind(&Acceptor::handleNewConnection, this));
-    acceptChannel_.enableReading();
+    acceptChannel_.setAcceptCallback(std::bind(&Acceptor::handleNewConnection, this));
 }
 
 void Acceptor::listen()
@@ -59,6 +59,7 @@ void Acceptor::listen()
 
 void Acceptor::handleNewConnection()
 {
-    struct sockaddr_in clientAddr;
+//    struct sockaddr_in clientAddr;
 
+    newConnectionCallback();
 }

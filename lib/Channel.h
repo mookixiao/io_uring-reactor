@@ -13,8 +13,8 @@ class EventLoop;
 
 class Channel {
 public:
-    explicit Channel(EventLoop *loop, struct io_uring& ring)
-            : ownerLoop_(loop), ring_(ring), listening(true), status_(STAT_NEW), events_(0), revents_(0)  {}
+    explicit Channel(EventLoop *loop, struct io_uring* ring)
+            : ownerLoop_(loop), ring_(ring), listening(true), events_(0), revents_(0)  {}
 
     // 监听套接字
     void setAcceptCallback(const AcceptCallback& cb) { acceptCallback_ = cb; }
@@ -31,8 +31,6 @@ public:
 
     void handleEvent();
 
-    Status status() { return status_;}
-
 private:
     void update();
 
@@ -43,7 +41,7 @@ private:
     CloseCallback closeCallback_;
 
     EventLoop *ownerLoop_;
-    struct io_uring ring_;
+    struct io_uring *ring_;
 
     EventType eventType;
 

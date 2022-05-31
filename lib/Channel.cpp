@@ -7,7 +7,6 @@
 
 void Channel::handleEvent()
 {
-
     switch (eventType) {
         case EVENT_ACCEPT:  // 监听套接字
             acceptCallback_();
