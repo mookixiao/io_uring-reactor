@@ -35,6 +35,9 @@ void Channel::enableReading()
     io_uring_prep_recv(sqe_, sockfd_, nullptr, MAX_MESSAGE_LEN, 0);
     sqe_->buf_group = BGID;
     auto *req = (struct ConnInfo *)malloc(sizeof(struct ConnInfo));
+    req->channel = this;
+    req->clientSocket = sockfd_;
+    req->eventType = EVENT_READ;
     io_uring_sqe_set_data(sqe_, req);
 
     io_uring_submit(ring_);
