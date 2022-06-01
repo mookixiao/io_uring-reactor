@@ -32,17 +32,17 @@ const int kCloseEvent = 0x04;
 typedef std::function<void(int sockfd, struct sockaddr_in &)> NewConnectionCallback;
 
 typedef std::function<void (const TcpConnectionPtr &)> ConnectionCallback;  // 用于TcpConnection
-typedef std::function<void (const TcpConnectionPtr &)> MessageCallback;
+typedef std::function<void (const TcpConnectionPtr &, char *buf, int size)> MessageCallback;
 typedef std::function<void (const TcpConnectionPtr &)> CloseCallback;
 
 typedef std::function<void ()> AcceptEventCallback;  // 用于监听Channel
 
-typedef std::function<void (struct io_uring_cqe *cqe)> ReadEventCallback;  // 用于普通Channel
+typedef std::function<void ()> ReadEventCallback;  // 用于普通Channel
 typedef std::function<void ()> WriteEventCallback;
 typedef std::function<void ()> CloseEventCallback;
 
 // Requests
-enum EventType { EVENT_ACCEPT, EVENT_READ, EVENT_WRITE };
+enum EventType { EVENT_ACCEPT, EVENT_READ, EVENT_WRITE, EVENT_PROV_BUF };
 
 struct ConnInfo {
     Channel *channel;

@@ -3,9 +3,9 @@
 #include "TcpServer.h"
 #include "Timestamp.h"
 
-void onMessage(const TcpConnectionPtr& conn, Buffer* buf, Timestamp receiveTime)
+void onMessage(const TcpConnectionPtr& conn, char *buf, int size)
 {
-    conn->send(buf->retrieveAsString());
+    conn->send(buf, size);
 }
 
 int main()

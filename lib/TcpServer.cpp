@@ -13,7 +13,7 @@ TcpServer::TcpServer(EventLoop *loop, int port)
     acceptor_.setNewConnectionCallback(std::bind(&TcpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-void TcpServer::newConnection(int sockfd, struct sockaddr_in &peerAddr)  // 在acceptChannel_中被调用
+void TcpServer::newConnection(int connfd, struct sockaddr_in &peerAddr)  // 在acceptChannel_中被调用
 {
     // 全局唯一连接名
     char buf[10];
@@ -24,10 +24,11 @@ void TcpServer::newConnection(int sockfd, struct sockaddr_in &peerAddr)  // 在a
     // 本端
     struct sockaddr_in localAddr;
     socklen_t localAddrLen = sizeof localAddr;
-    ::getsockname(sockfd, (sockaddr *)&localAddr, &localAddrLen);
+    ::getsockname(connfd, (sockaddr *)&localAddr, &localAddrLen);
 
+    // 远端
     TcpConnectionPtr conn(new TcpConnection(
-            ownerLoop_, &ring_, connName, sockfd, localAddr, peerAddr));
+            ownerLoop_, &ring_, connName, connfd, localAddr, peerAddr));
     connections_[connName] = conn;
     conn->setConnectionCallback(connectionCallback_);
     conn->setMessageCallback(messageCallback_);

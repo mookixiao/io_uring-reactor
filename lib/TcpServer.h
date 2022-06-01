@@ -20,7 +20,7 @@ public:
     void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
 
 private:
-    void newConnection(int sockfd, struct sockaddr_in &peerAddr);
+    void newConnection(int connfd, struct sockaddr_in &peerAddr);
     void removeConnection(const TcpConnectionPtr &conn);
 
     ConnectionCallback connectionCallback_;

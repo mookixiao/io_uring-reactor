@@ -20,12 +20,13 @@ public:
     void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
     void setCloseCallback(const CloseCallback &cb) { closeCallback_ = cb; }
 
+    void send(char *buf, int size);
     void connectEstablished();
 
     std::string name() { return name_; }
 
 private:
-    void handleRead(struct io_uring_cqe *cqe);
+    void handleRead();
     void handleWrite();
     void handleClose();
 
@@ -40,6 +41,8 @@ private:
     // TcpConnection
     EventLoop *ownerLoop_;
     struct io_uring *ring_;
+    struct io_uring_sqe *sqe_;
+    struct io_uring_cqe *cqe_;
     std::string name_;
 
     // 相配的Channel

@@ -28,15 +28,12 @@ private:
     EventLoop *ownerLoop_;
     struct io_uring *ring_;
     struct io_uring_sqe *sqe_;
-
-    // 缓冲区
-    char buf[MAX_CONNECTIONS][MAX_MESSAGE_LEN];
+    struct io_uring_cqe *cqe_;
 
     int acceptSocket_;
     Channel acceptChannel_;
 
     struct sockaddr_in peerAddr_;
-    socklen_t peerAddrLen_;
 
     NewConnectionCallback newConnectionCallback;
 };

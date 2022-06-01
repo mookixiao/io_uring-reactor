@@ -13,13 +13,15 @@ class EventLoop;
 
 class Channel {
 public:
-    explicit Channel(EventLoop *loop, struct io_uring* ring, int sockfd)
-            : ownerLoop_(loop), ring_(ring), sockfd_(sockfd), listening_(false), events_(0), revents_(0)  {}
+    explicit Channel(EventLoop *loop, struct io_uring *ring, int sockfd)
+            : ownerLoop_(loop), ring_(ring), sockfd_(sockfd)  {}
+
+    void handleEvent();
 
     // 监听套接字
     void setAcceptCallback(const AcceptEventCallback& cb) { acceptCallback_ = cb; }
 
-    void enableListen();
+    void enableListen(struct sockaddr_in &peerAddr);
 
     // 一般套接字
     void setReadCallback(const ReadEventCallback& cb) { readCallback_ = cb; };
@@ -27,15 +29,15 @@ public:
     void setCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; };
 
     void enableReading();
-    void enableWriting(struct Request *req);
+    void enableWriting();
 
-    void handleEvent();
+    // 状态
+    int fd() { return sockfd_; }
 
-    void setCqe(struct io_uring_cqe *cqe) { cqe_ = cqe;};
+    struct io_uring_cqe* cqe() { return cqe_; }
+    void setCqe(struct io_uring_cqe *cqe) { cqe_ = cqe; }
 
 private:
-//    void update();
-
     AcceptEventCallback acceptCallback_;
 
     ReadEventCallback readCallback_;
@@ -49,11 +51,7 @@ private:
 
     int sockfd_;
 
-    bool listening_;
     EventType eventType;
-
-    int events_;  // 对什么事件感兴趣
-    int revents_;  // 当前发生了什么事件
 };
 
 

@@ -4,6 +4,8 @@
 
 #include <cstring>
 
+#include <arpa//inet.h>
+
 #include "Channel.h"
 #include "EventLoop.h"
 #include "Limits.h"
@@ -22,9 +24,18 @@ void Channel::handleEvent() {
     }
 }
 
-void Channel::enableListen()
+void Channel::enableListen(struct sockaddr_in &peerAddr)  // 针对监听套接字
 {
-    // 将io_uring监听请求提交
+    sqe_ = io_uring_get_sqe(ring_);
+
+    socklen_t peerAddrLen = sizeof peerAddr;
+    io_uring_prep_accept(sqe_, sockfd_, (struct sockaddr *)&peerAddr, &peerAddrLen, 0);
+    auto *info = (struct ConnInfo *)malloc(sizeof(struct ConnInfo));
+    info->channel = this;
+    info->eventType = EVENT_ACCEPT;
+    info->clientSocket = sockfd_;
+    io_uring_sqe_set_data(sqe_, info);
+
     io_uring_submit(ring_);
 }
 
@@ -43,14 +54,7 @@ void Channel::enableReading()
     io_uring_submit(ring_);
 }
 
-void Channel::enableWriting(int numBytes)
+void Channel::enableWriting()
 {
-    sqe_ = io_uring_get_sqe(ring_);
 
-    io_uring_prep_send(sqe_, sockfd_, bufs[], numBytes, 0);
-    io_uring_sqe_set_flags(sqe, flags);
-    auto *req = (struct ConnInfo *)malloc(sizeof(struct ConnInfo));
-    io_uring_sqe_set_data(sqe_, req);
-
-    io_uring_submit(ring_);
 }
