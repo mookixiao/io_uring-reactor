@@ -10,14 +10,14 @@
 
 #include "Limits.h"
 
-Acceptor::Acceptor(EventLoop *loop, struct io_uring &ring, int port)
+Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
         : ownerLoop_(loop),
         ring_(ring),
-        acceptChannel_(ownerLoop_, ring_),
+        acceptSocket_(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)),
+        acceptChannel_(ownerLoop_, ring_, acceptSocket_),
         clientAddrLen(sizeof clientAddr)
 {
     // 监听套接字
-    acceptSocket_ = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
     if (acceptSocket_ < 0) {
         perror("socket");
     }
@@ -47,19 +47,43 @@ void Acceptor::listen()
         perror("listen");
     }
 
+    // 设置io_uring缓冲区
+    struct io_uring_sqe *sqe;
+    struct io_uring_cqe *cqe;
+
+    sqe = io_uring_get_sqe(ring_);
+    io_uring_prep_provide_buffers(sqe, buf, MAX_MESSAGE_LEN, BUFFERS_COUNT, BGID, 0);
+    io_uring_submit(ring_);
+
+    io_uring_wait_cqe(ring_, &cqe);
+    if (cqe->res < 0) {
+        perror("io_uring_wait_cqe");
+    }
+    io_uring_cqe_seen(ring_, cqe);
+
     // 使用io_uring进行监视
-    struct io_uring_sqe *sqe = io_uring_get_sqe(&ring_);
+    io_uring_get_sqe(ring_);
     io_uring_prep_accept(sqe, acceptSocket_, (struct sockaddr *)&clientAddr, &clientAddrLen, 0);
     auto req = (struct Request *)malloc(sizeof(struct Request));
     req->eventType = EVENT_ACCEPT;
     io_uring_sqe_set_data(sqe, req);
 
+    // 设置
     acceptChannel_.enableListen();
 }
 
 void Acceptor::handleNewConnection()
 {
-//    struct sockaddr_in clientAddr;
+    int connFd;
+    struct sockaddr_in peerAddr;
 
-    newConnectionCallback();
+    struct io_uring_cqe *cqe;
+    if (io_uring_wait_cqe(ring_, &cqe) < 0) {
+        perror("io_uring_wait_cqe");
+    }
+    if ((connFd = cqe->res) < 0) {
+        perror("io_uring_wait_cqe, cqe->res < 0");
+    }
+
+    newConnectionCallback(connFd, peerAddr);
 }

@@ -9,8 +9,10 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "Channel.h"
 #include "liburing.h"
+
+#include "Channel.h"
+#include "Limits.h"
 
 class Acceptor {
 public:
@@ -24,9 +26,12 @@ private:
     void handleNewConnection();  // 接受新连接
 
     EventLoop *ownerLoop_;
+    struct io_uring *ring_;
+
+    // 缓冲区
+    char buf[MAX_CONNECTIONS][MAX_MESSAGE_LEN];
 
     int acceptSocket_;
-    struct io_uring ring_;
     Channel acceptChannel_;
 
     struct sockaddr_in clientAddr;

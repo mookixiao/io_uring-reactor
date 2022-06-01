@@ -13,17 +13,17 @@ class EventLoop;
 
 class Channel {
 public:
-    explicit Channel(EventLoop *loop, struct io_uring* ring)
-            : ownerLoop_(loop), ring_(ring), listening(true), events_(0), revents_(0)  {}
+    explicit Channel(EventLoop *loop, struct io_uring* ring, int sockfd)
+            : ownerLoop_(loop), ring_(ring), sockfd_(sockfd), listening_(false), events_(0), revents_(0)  {}
 
     // 监听套接字
-    void setAcceptCallback(const AcceptCallback& cb) { acceptCallback_ = cb; }
+    void setAcceptCallback(const AcceptEventCallback& cb) { acceptCallback_ = cb; }
 
-    void enableListen() { listening = true; io_uring_submit(&ring_); };
+    void enableListen() { listening_ = true; io_uring_submit(ring_); };
 
     // 一般套接字
-    void setReadCallback(const ReadCallback& cb) { readCallback_ = cb; };
-    void setWriteCallback(const ReadCallback& cb) { writeCallback_ = cb; };
+    void setReadCallback(const ReadEventCallback& cb) { readCallback_ = cb; };
+    void setWriteCallback(const ReadEventCallback& cb) { writeCallback_ = cb; };
     void setCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; };
 
     void enableReading() { events_ |= kReadEvent; update(); }
@@ -34,18 +34,19 @@ public:
 private:
     void update();
 
-    AcceptCallback acceptCallback_;
+    AcceptEventCallback acceptCallback_;
 
-    ReadCallback readCallback_;
-    WriteCallback writeCallback_;
+    ReadEventCallback readCallback_;
+    WriteEventCallback writeCallback_;
     CloseCallback closeCallback_;
 
     EventLoop *ownerLoop_;
     struct io_uring *ring_;
 
-    EventType eventType;
+    int sockfd_;
 
-    bool listening;
+    bool listening_;
+    EventType eventType;
 
     int events_;  // 对什么事件感兴趣
     int revents_;  // 当前发生了什么事件

@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -28,14 +29,15 @@ const int kCloseEvent = 0x04;
 // Func
 typedef std::function<void(int sockfd, struct sockaddr_in &)> NewConnectionCallback;
 
-typedef std::function<void()> ConnectionCallback;
-typedef std::function<void()> MessageCallback;
+typedef std::function<void (const TcpConnectionPtr &)> ConnectionCallback;  // 用于TcpConnection
+typedef std::function<void (const TcpConnectionPtr &)> MessageCallback;
+typedef std::function<void (const TcpConnectionPtr &)> CloseCallback;
 
-typedef std::function<void()> AcceptCallback;  // 用于监听Channel
+typedef std::function<void()> AcceptEventCallback;  // 用于监听Channel
 
-typedef std::function<void()> ReadCallback;  // 用于普通Channel
-typedef std::function<void()> WriteCallback;
-typedef std::function<void()> CloseCallback;
+typedef std::function<void()> ReadEventCallback;  // 用于普通Channel
+typedef std::function<void()> WriteEventCallback;
+typedef std::function<void()> CloseEventCallback;
 
 // Requests
 enum EventType { EVENT_ACCEPT, EVENT_READ, EVENT_WRITE };

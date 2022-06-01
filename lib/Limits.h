@@ -9,6 +9,7 @@
 #define BACKLOG             512
 
 // 连接
+#define BGID                1337
 #define MAX_CONNECTIONS     4096
 #define MAX_MESSAGE_LEN     2048
 #define BUFFERS_COUNT       MAX_CONNECTIONS

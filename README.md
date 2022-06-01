@@ -2,4 +2,4 @@
 
 ## 存在的疑问
 
-1. Channel的setReadCallback(const ReadCallback& readCallback)那里为什么必须是const
+1. Channel的setReadCallback(const ReadEventCallback& readCallback)那里为什么必须是const
