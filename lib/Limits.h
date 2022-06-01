@@ -12,6 +12,7 @@
 #define BGID                1337
 #define MAX_CONNECTIONS     4096
 #define MAX_MESSAGE_LEN     2048
-#define BUFFERS_COUNT       MAX_CONNECTIONS
+
+char bufs[MAX_CONNECTIONS][MAX_MESSAGE_LEN];
 
 #endif //IO_URING_REACTOR_LIMITS_H

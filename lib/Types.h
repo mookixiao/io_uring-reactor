@@ -13,6 +13,8 @@
 
 #include <sys/uio.h>
 
+#include <liburing.h>
+
 class Channel;
 class TcpConnection;
 
@@ -33,21 +35,21 @@ typedef std::function<void (const TcpConnectionPtr &)> ConnectionCallback;  // �
 typedef std::function<void (const TcpConnectionPtr &)> MessageCallback;
 typedef std::function<void (const TcpConnectionPtr &)> CloseCallback;
 
-typedef std::function<void()> AcceptEventCallback;  // 用于监听Channel
+typedef std::function<void ()> AcceptEventCallback;  // 用于监听Channel
 
-typedef std::function<void()> ReadEventCallback;  // 用于普通Channel
-typedef std::function<void()> WriteEventCallback;
-typedef std::function<void()> CloseEventCallback;
+typedef std::function<void (struct io_uring_cqe *cqe)> ReadEventCallback;  // 用于普通Channel
+typedef std::function<void ()> WriteEventCallback;
+typedef std::function<void ()> CloseEventCallback;
 
 // Requests
 enum EventType { EVENT_ACCEPT, EVENT_READ, EVENT_WRITE };
 
-struct Request {
+struct ConnInfo {
     Channel *channel;
     EventType eventType;
-    int iovecCnt;
+//    int iovecCnt;
     int clientSocket;
-    struct iovec iov[];
+//    struct iovec iov[];
 };
 
 // Socket

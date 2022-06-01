@@ -10,7 +10,8 @@
 #include "Channel.h"
 #include "EventLoop.h"
 
-class TcpConnection {
+class TcpConnection : std::enable_shared_from_this<TcpConnection>
+{
 public:
     TcpConnection(EventLoop *loop, struct io_uring *ring, std::string &name,
                   int sockfd, struct sockaddr_in &localAddr, struct sockaddr_in &peerAddr);
@@ -20,11 +21,14 @@ public:
     void setCloseCallback(const CloseCallback &cb) { closeCallback_ = cb; }
 
     void connectEstablished();
-    void connectDestroyed();
 
     std::string name() { return name_; }
 
 private:
+    void handleRead(struct io_uring_cqe *cqe);
+    void handleWrite();
+    void handleClose();
+
     enum State { kConnecting, kConnected, kDisconnecting, kDisconnected};
     State state_;
     void setState(State s) { state_ = s; };
@@ -39,7 +43,7 @@ private:
     std::string name_;
 
     // 相配的Channel
-    Channel channel_;
+    Channel *channel_;
 };
 
 

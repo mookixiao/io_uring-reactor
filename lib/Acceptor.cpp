@@ -15,7 +15,7 @@ Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
         ring_(ring),
         acceptSocket_(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)),
         acceptChannel_(ownerLoop_, ring_, acceptSocket_),
-        clientAddrLen(sizeof clientAddr)
+        peerAddrLen_(sizeof peerAddr_)
 {
     // 监听套接字
     if (acceptSocket_ < 0) {
@@ -36,6 +36,18 @@ Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
         perror("bind");
     }
 
+    // 准备缓存
+    sqe_ = io_uring_get_sqe(ring_);
+    struct io_uring_cqe *cqe;
+    io_uring_prep_provide_buffers(sqe_, bufs, MAX_MESSAGE_LEN, MAX_CONNECTIONS, BGID, 0);
+    io_uring_submit(ring_);
+
+    io_uring_wait_cqe(ring_, &cqe);
+    if (cqe->res < 0) {
+        perror("io_uring_wait_cqe");
+    }
+    io_uring_cqe_seen(ring_, cqe);
+
     // Channel
     acceptChannel_.setAcceptCallback(std::bind(&Acceptor::handleNewConnection, this));
 }
@@ -47,35 +59,19 @@ void Acceptor::listen()
         perror("listen");
     }
 
-    // 设置io_uring缓冲区
-    struct io_uring_sqe *sqe;
-    struct io_uring_cqe *cqe;
-
-    sqe = io_uring_get_sqe(ring_);
-    io_uring_prep_provide_buffers(sqe, buf, MAX_MESSAGE_LEN, BUFFERS_COUNT, BGID, 0);
-    io_uring_submit(ring_);
-
-    io_uring_wait_cqe(ring_, &cqe);
-    if (cqe->res < 0) {
-        perror("io_uring_wait_cqe");
-    }
-    io_uring_cqe_seen(ring_, cqe);
-
-    // 使用io_uring进行监视
-    io_uring_get_sqe(ring_);
-    io_uring_prep_accept(sqe, acceptSocket_, (struct sockaddr *)&clientAddr, &clientAddrLen, 0);
-    auto req = (struct Request *)malloc(sizeof(struct Request));
+    // TODO： 把这一部分逻辑移到Channel更合适
+    sqe_ = io_uring_get_sqe(ring_);
+    io_uring_prep_accept(sqe_, acceptSocket_, (struct sockaddr *)&peerAddr_, &peerAddrLen_, 0);
+    struct Request *req = (struct Request *)malloc(sizeof(*req) + sizeof(struct iovec));
     req->eventType = EVENT_ACCEPT;
-    io_uring_sqe_set_data(sqe, req);
+    io_uring_sqe_set_data(sqe_, req);
 
-    // 设置
     acceptChannel_.enableListen();
 }
 
 void Acceptor::handleNewConnection()
 {
     int connFd;
-    struct sockaddr_in peerAddr;
 
     struct io_uring_cqe *cqe;
     if (io_uring_wait_cqe(ring_, &cqe) < 0) {
@@ -85,5 +81,5 @@ void Acceptor::handleNewConnection()
         perror("io_uring_wait_cqe, cqe->res < 0");
     }
 
-    newConnectionCallback(connFd, peerAddr);
+    newConnectionCallback(connFd, peerAddr_);
 }

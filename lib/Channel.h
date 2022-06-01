@@ -19,20 +19,22 @@ public:
     // 监听套接字
     void setAcceptCallback(const AcceptEventCallback& cb) { acceptCallback_ = cb; }
 
-    void enableListen() { listening_ = true; io_uring_submit(ring_); };
+    void enableListen();
 
     // 一般套接字
     void setReadCallback(const ReadEventCallback& cb) { readCallback_ = cb; };
-    void setWriteCallback(const ReadEventCallback& cb) { writeCallback_ = cb; };
+    void setWriteCallback(const WriteEventCallback& cb) { writeCallback_ = cb; };
     void setCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; };
 
-    void enableReading() { events_ |= kReadEvent; update(); }
-    void enableWriting() { events_ |= kWriteEvent; }
+    void enableReading();
+    void enableWriting(struct Request *req);
 
     void handleEvent();
 
+    void setCqe(struct io_uring_cqe *cqe) { cqe_ = cqe;};
+
 private:
-    void update();
+//    void update();
 
     AcceptEventCallback acceptCallback_;
 
@@ -42,6 +44,8 @@ private:
 
     EventLoop *ownerLoop_;
     struct io_uring *ring_;
+    struct io_uring_sqe *sqe_;
+    struct io_uring_cqe *cqe_;
 
     int sockfd_;
 

@@ -17,7 +17,7 @@ public:
     IOUringPoller();
     ~IOUringPoller();
 
-    void poll(ChannelList& activeChannels);
+    void poll(ChannelList& channels);
 
     void updateChannel(Channel *channel);
 

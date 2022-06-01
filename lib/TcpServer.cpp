@@ -13,7 +13,7 @@ TcpServer::TcpServer(EventLoop *loop, int port)
     acceptor_.setNewConnectionCallback(std::bind(&TcpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-void TcpServer::newConnection(int sockfd, struct sockaddr_in &peerAddr)
+void TcpServer::newConnection(int sockfd, struct sockaddr_in &peerAddr)  // 在acceptChannel_中被调用
 {
     // 全局唯一连接名
     char buf[10];
