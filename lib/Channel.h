@@ -19,7 +19,7 @@ public:
     void handleEvent();
 
     // 监听套接字
-    void setAcceptCallback(const AcceptEventCallback& cb) { acceptCallback_ = cb; }
+    void setAcceptCallback(const AcceptEventCallback& cb) { acceptCompleteCallback_ = cb; }
 
     void addListen(struct sockaddr_in &peerAddr);
 
@@ -33,11 +33,15 @@ public:
 
     // 状态
     int fd() { return sockfd_; }
+    struct ConnInfo *info() { return info_; }
+    int res() { return res_; }
+
+    void setConnInfo(struct ConnInfo *info) { info_ = info; }
     void setRes(int res) { res_ = res; }
     void setEventType(EventType type) { eventType_ = type; };
 
 private:
-    AcceptEventCallback acceptCallback_;
+    AcceptEventCallback acceptCompleteCallback_;
 
     ReadEventCallback readCallback_;
     WriteEventCallback writeCallback_;
@@ -45,6 +49,7 @@ private:
 
     struct io_uring *ring_;
     struct io_uring_sqe *sqe_;
+    struct ConnInfo *info_;
     int res_;
 
     int sockfd_;

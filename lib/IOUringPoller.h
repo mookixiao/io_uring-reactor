@@ -22,7 +22,7 @@ public:
 private:
     EventLoop* ownerLoop_;
     struct io_uring* ring_;
-    struct io_uring_cqe *cqe_;
+    struct io_uring_cqe *nowCqe_;
 };
 
 

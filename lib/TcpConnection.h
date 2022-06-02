@@ -16,18 +16,21 @@ public:
     TcpConnection(EventLoop *loop, struct io_uring *ring, std::string &name,
                   int sockfd, struct sockaddr_in &localAddr, struct sockaddr_in &peerAddr);
 
-    void setConnectionCallback(const ConnectionCallback &cb) { connectionCallback_ = cb; }
-    void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
     void setCloseCallback(const CloseCallback &cb) { closeCallback_ = cb; }
 
-    void send(char *buf, int size);
+    void setConnectionCallback(const ConnectionCallback &cb) { connectionCallback_ = cb; }
+    void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
+
     void connectEstablished();
+    void send(char *buf, int size);
 
     std::string name() { return name_; }
 
 private:
-    void handleRead();
-    void handleWrite();
+    void handleReadComplete();
+    void handleWriteComplete();
+
+    void handleClose();
 
     enum State { kConnecting, kConnected, kDisconnecting, kDisconnected};
     State state_;
