@@ -30,27 +30,17 @@ void TcpConnection::connectEstablished()
     connectionCallback_(shared_from_this());
 }
 
-// 提供给messageCallback_中调用
+// 在messageCallback_中被调用
 void TcpConnection::send(char *buf, int size)
 {
-    // TODO: 这一部分移动到Channel中更合适
-    sqe_ = io_uring_get_sqe(ring_);
-
-    io_uring_prep_send(sqe_, channel_->fd(), buf, size, 0);
-    auto info = (struct ConnInfo*)malloc(sizeof(struct ConnInfo));
-    info->channel = channel_;
-    info->eventType = EVENT_WRITE_COMPLETE;
-    info->sockfd = channel_->fd();
-    io_uring_sqe_set_data(sqe_, info);
-
-    io_uring_submit(ring_);
+    channel_->addWrite(buf, size);
 }
 
 // 提供给Channel作为各个事件的回调
 void TcpConnection::handleReadComplete()
 {
-    int bufId = channel_->info()->bId;
-    int size = channel_->res();
+    int bufId = channel_->getCqe()->flags >> 16;
+    int size = channel_->getCqe()->res;
 
     messageCallback_(shared_from_this(), bufs[bufId], size);
 }

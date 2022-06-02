@@ -27,8 +27,6 @@ private:
     struct io_uring ring_;
     std::shared_ptr<IOUringPoller> poller_;
     ChannelList activeChannels_;
-
-
 };
 
 

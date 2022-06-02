@@ -14,7 +14,7 @@ class EventLoop;
 class Channel {
 public:
     explicit Channel(struct io_uring *ring, int sockfd)
-            : ring_(ring), sockfd_(sockfd)  {}
+            : ring_(ring), fd_(sockfd)  {}
 
     void handleEvent();
 
@@ -29,15 +29,19 @@ public:
     void setCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; };
 
     void addRead();
-    void addWrite();
+    void addWrite(char *buf, int size);
+    void addBuffer(char *buf, int size);
 
     // 状态
-    int fd() { return sockfd_; }
-    struct ConnInfo *info() { return info_; }
-    int res() { return res_; }
+    int getFd() { return fd_; }
 
+    struct io_uring_cqe* getCqe() { return cqe_; }
+    void setCqe(struct io_uring_cqe *cqe) { cqe_ = cqe; }
+
+    struct ConnInfo* getConnInfo() { return info_; }
     void setConnInfo(struct ConnInfo *info) { info_ = info; }
-    void setRes(int res) { res_ = res; }
+
+    EventType getEventType() { return eventType_; }
     void setEventType(EventType type) { eventType_ = type; };
 
 private:
@@ -47,12 +51,13 @@ private:
     WriteEventCallback writeCallback_;
     CloseCallback closeCallback_;
 
+    int fd_;
+
     struct io_uring *ring_;
     struct io_uring_sqe *sqe_;
+    struct io_uring_cqe *cqe_;
     struct ConnInfo *info_;
-    int res_;
 
-    int sockfd_;
     EventType eventType_;
 };
 

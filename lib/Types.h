@@ -42,13 +42,13 @@ typedef std::function<void ()> WriteEventCallback;
 typedef std::function<void ()> CloseEventCallback;
 
 // Requests
-enum EventType { EVENT_ACCEPT_COMPLETE, EVENT_READ_COMPLETE, EVENT_WRITE_COMPLETE, EVENT_SER_BUF_COMPLETE };
+enum EventType { EVENT_ACCEPT, EVENT_READ, EVENT_WRITE, EVENT_SER_BUF_COMPLETE };
 
 struct ConnInfo {
     Channel *channel;
     EventType eventType;
     int sockfd;  // 对于监听套接字指本端，对于连接套接字指对端
-    int bId;  // 普通套接字专用
+//    int bId;  // 普通套接字专用
 };
 
 // Socket
