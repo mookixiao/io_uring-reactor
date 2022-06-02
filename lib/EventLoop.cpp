@@ -4,15 +4,20 @@
 
 #include "Channel.h"
 #include "EventLoop.h"
+#include "Limits.h"
 
 #include "IOUringPoller.h"
 
 EventLoop::EventLoop()
-        : poller_(new IOUringPoller)
 {
+    if (io_uring_queue_init(MAX_CONNECTIONS, &ring_, 0) < 0) {
+        perror("io_uring_queue_init");
+    }
+
+    poller_ = std::make_shared<IOUringPoller>(this, &ring_);
 }
 
-void EventLoop::poll()
+void EventLoop::loop()
 {
     while(true) {
         activeChannels_.clear();

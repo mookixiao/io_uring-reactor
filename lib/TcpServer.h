@@ -16,6 +16,8 @@ class TcpServer {
 public:
     TcpServer(EventLoop *loop, int port);
 
+    void start();
+
     void setConnectionCallback(const ConnectionCallback &cb) { connectionCallback_ = cb; }
     void setMessageCallback(const MessageCallback &cb) { messageCallback_ = cb; }
 
@@ -27,7 +29,7 @@ private:
     MessageCallback messageCallback_;
 
     EventLoop *ownerLoop_;
-    struct io_uring ring_;
+    struct io_uring *ring_;
 
     int connId_;
 

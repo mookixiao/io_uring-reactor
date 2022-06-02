@@ -7,10 +7,16 @@
 
 TcpServer::TcpServer(EventLoop *loop, int port)
         : ownerLoop_(loop),
-        acceptor_(ownerLoop_, &ring_, port),
+        ring_(loop->ring()),
+        acceptor_(ownerLoop_, ring_, port),
         connId_(0)
 {
     acceptor_.setNewConnectionCallback(std::bind(&TcpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2));
+}
+
+void TcpServer::start()
+{
+    acceptor_.listen();
 }
 
 void TcpServer::newConnection(int connfd, struct sockaddr_in &peerAddr)  // 在acceptChannel_中被调用
@@ -28,7 +34,7 @@ void TcpServer::newConnection(int connfd, struct sockaddr_in &peerAddr)  // 在a
 
     // 远端
     TcpConnectionPtr conn(new TcpConnection(
-            ownerLoop_, &ring_, connName, connfd, localAddr, peerAddr));
+            ownerLoop_, ring_, connName, connfd, localAddr, peerAddr));
     connections_[connName] = conn;
     conn->setConnectionCallback(connectionCallback_);
     conn->setMessageCallback(messageCallback_);

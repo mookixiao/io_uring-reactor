@@ -11,20 +11,24 @@
 #include "Limits.h"
 
 void Channel::handleEvent() {
-    switch (eventType) {
+    switch (eventType_) {
         case EVENT_ACCEPT:  // 监听套接字
             acceptCallback_();
             break;
         case EVENT_READ:  // 连接套接字
-            readCallback_(cqe_);
+            readCallback_();
             break;
         case EVENT_WRITE:  // 连接套接字
             writeCallback_();
             break;
+        case EVENT_PROV_BUF:
+            if (res_ < 0) {
+                perror("EVENT_PROV_BUF");
+            }
     }
 }
 
-void Channel::enableListen(struct sockaddr_in &peerAddr)  // 针对监听套接字
+void Channel::addListen(struct sockaddr_in &peerAddr)  // 针对监听套接字
 {
     sqe_ = io_uring_get_sqe(ring_);
 
@@ -33,13 +37,13 @@ void Channel::enableListen(struct sockaddr_in &peerAddr)  // 针对监听套接�
     auto *info = (struct ConnInfo *)malloc(sizeof(struct ConnInfo));
     info->channel = this;
     info->eventType = EVENT_ACCEPT;
-    info->clientSocket = sockfd_;
+    info->sockfd = sockfd_;
     io_uring_sqe_set_data(sqe_, info);
 
     io_uring_submit(ring_);
 }
 
-void Channel::enableReading()
+void Channel::addRead()
 {
     sqe_ = io_uring_get_sqe(ring_);
 
@@ -47,14 +51,14 @@ void Channel::enableReading()
     sqe_->buf_group = BGID;
     auto *req = (struct ConnInfo *)malloc(sizeof(struct ConnInfo));
     req->channel = this;
-    req->clientSocket = sockfd_;
+    req->sockfd = sockfd_;
     req->eventType = EVENT_READ;
     io_uring_sqe_set_data(sqe_, req);
 
     io_uring_submit(ring_);
 }
 
-void Channel::enableWriting()
+void Channel::addWrite()
 {
 
 }

@@ -16,13 +16,9 @@ Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
         : ownerLoop_(loop),
         ring_(ring),
         acceptSocket_(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)),
-        acceptChannel_(ownerLoop_, ring_, acceptSocket_)
+        acceptChannel_(ring_, acceptSocket_)
 {
     // 准备监听套接字
-    if (acceptSocket_ < 0) {
-        perror("socket");
-    }
-
     int opt = 1;
     if (::setsockopt(acceptSocket_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof opt) < 0) {
         perror("setsockopt");
@@ -48,7 +44,7 @@ Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
     }
     io_uring_cqe_seen(ring_, cqe_);
 
-    // Channel
+    // 准备Channel
     acceptChannel_.setAcceptCallback(std::bind(&Acceptor::handleNewConnection, this));
 }
 
@@ -59,13 +55,13 @@ void Acceptor::listen()
         perror("listen");
     }
 
-    acceptChannel_.enableListen(peerAddr_);  // 每次有新连接时，远端信息会存放到此peerAddr_中
+    acceptChannel_.addListen(newPeerAddr_);  // 每次有新连接时，远端信息会存放到此peerAddr_中
 }
 
 void Acceptor::handleNewConnection()
 {
+    // 建立新连接并交由TcpServer管理
     int connFd;
-
     if (io_uring_wait_cqe(ring_, &cqe_) < 0) {
         perror("io_uring_wait_cqe");
     }
@@ -73,5 +69,8 @@ void Acceptor::handleNewConnection()
         perror("io_uring_wait_cqe, cqe->res < 0");
     }
 
-    newConnectionCallback(connFd, peerAddr_);
+    newConnectionCallback(connFd, newPeerAddr_);
+
+    // 重新开始监听
+    acceptChannel_.addListen(newPeerAddr_);
 }

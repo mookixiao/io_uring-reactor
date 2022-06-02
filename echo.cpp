@@ -1,7 +1,10 @@
 #include "EventLoop.h"
-#include "InetAddress.h"
+#include "TcpConnection.h"
 #include "TcpServer.h"
-#include "Timestamp.h"
+
+void onConnection(const TcpConnectionPtr& conn)
+{
+}
 
 void onMessage(const TcpConnectionPtr& conn, char *buf, int size)
 {
@@ -10,10 +13,11 @@ void onMessage(const TcpConnectionPtr& conn, char *buf, int size)
 
 int main()
 {
-    InetAddress listenAddr(10001);  // 0.0.0.0:10001
+    int port = 10001;
     EventLoop loop;
 
-    TcpServer server(&loop, listenAddr);
+    TcpServer server(&loop, port);
+    server.setConnectionCallback(onConnection);
     server.setMessageCallback(onMessage);
     server.start();
 

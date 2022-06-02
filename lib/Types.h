@@ -47,9 +47,8 @@ enum EventType { EVENT_ACCEPT, EVENT_READ, EVENT_WRITE, EVENT_PROV_BUF };
 struct ConnInfo {
     Channel *channel;
     EventType eventType;
-//    int iovecCnt;
-    int clientSocket;
-//    struct iovec iov[];
+    int sockfd;  // 对于监听套接字指本端，对于连接套接字指对端
+    int bId;  // 普通套接字专用
 };
 
 // Socket

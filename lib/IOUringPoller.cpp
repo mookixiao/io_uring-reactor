@@ -8,30 +8,18 @@
 
 #include "Channel.h"
 
-IOUringPoller::IOUringPoller() {
-
-}
-
 IOUringPoller::~IOUringPoller() {
 
 }
 
 void IOUringPoller::poll(ChannelList &channels) {
-    io_uring_submit_and_wait(&ring, 1);
-
-    int head;
-    int cnt = 0;
-    struct io_uring_cqe *cqe;
-    io_uring_for_each_cqe(&ring, head, cqe) {
-        ++cnt;
-        auto req = (struct ConnInfo *)cqe->user_data;
-        req->channel->setCqe(cqe);
-        channels.push_back(req->channel);
-}
-
-void IOUringPoller::updateChannel(Channel *channel) {
-    Status status = channel->status();
-    if (status == STAT_NEW) {
-
+    if (io_uring_wait_cqe(ring_, &cqe_) < 0) {
+        perror("io_uring_wait_cqe");
     }
+
+    auto req = (struct ConnInfo *)cqe_->user_data;
+    Channel *channel = req->channel;
+    channel->setRes(cqe_->res);  // 设置返回值
+    channel->setEventType(req->eventType);  // 设置事件类型
+    channels.push_back(channel);  // 交由EventLoop处理
 }

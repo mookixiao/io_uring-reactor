@@ -28,7 +28,6 @@ public:
 private:
     void handleRead();
     void handleWrite();
-    void handleClose();
 
     enum State { kConnecting, kConnected, kDisconnecting, kDisconnected};
     State state_;

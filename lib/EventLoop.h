@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include <liburing.h>
+
 #include "Types.h"
 
 class Channel;
@@ -17,14 +19,16 @@ public:
     EventLoop();
     ~EventLoop();
 
-    void poll();
+    void loop();
 
-    void updateChannel(Channel *channel);
+    struct io_uring* ring() { return &ring_; };
 
 private:
-    // IOUringPoller
+    struct io_uring ring_;
     std::shared_ptr<IOUringPoller> poller_;
     ChannelList activeChannels_;
+
+
 };
 
 

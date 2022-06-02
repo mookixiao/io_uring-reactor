@@ -13,29 +13,28 @@ class EventLoop;
 
 class Channel {
 public:
-    explicit Channel(EventLoop *loop, struct io_uring *ring, int sockfd)
-            : ownerLoop_(loop), ring_(ring), sockfd_(sockfd)  {}
+    explicit Channel(struct io_uring *ring, int sockfd)
+            : ring_(ring), sockfd_(sockfd)  {}
 
     void handleEvent();
 
     // 监听套接字
     void setAcceptCallback(const AcceptEventCallback& cb) { acceptCallback_ = cb; }
 
-    void enableListen(struct sockaddr_in &peerAddr);
+    void addListen(struct sockaddr_in &peerAddr);
 
     // 一般套接字
     void setReadCallback(const ReadEventCallback& cb) { readCallback_ = cb; };
     void setWriteCallback(const WriteEventCallback& cb) { writeCallback_ = cb; };
     void setCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; };
 
-    void enableReading();
-    void enableWriting();
+    void addRead();
+    void addWrite();
 
     // 状态
     int fd() { return sockfd_; }
-
-    struct io_uring_cqe* cqe() { return cqe_; }
-    void setCqe(struct io_uring_cqe *cqe) { cqe_ = cqe; }
+    void setRes(int res) { res_ = res; }
+    void setEventType(EventType type) { eventType_ = type; };
 
 private:
     AcceptEventCallback acceptCallback_;
@@ -44,14 +43,12 @@ private:
     WriteEventCallback writeCallback_;
     CloseCallback closeCallback_;
 
-    EventLoop *ownerLoop_;
     struct io_uring *ring_;
     struct io_uring_sqe *sqe_;
-    struct io_uring_cqe *cqe_;
+    int res_;
 
     int sockfd_;
-
-    EventType eventType;
+    EventType eventType_;
 };
 
 

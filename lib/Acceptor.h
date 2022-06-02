@@ -33,7 +33,7 @@ private:
     int acceptSocket_;
     Channel acceptChannel_;
 
-    struct sockaddr_in peerAddr_;
+    struct sockaddr_in newPeerAddr_;
 
     NewConnectionCallback newConnectionCallback;
 };

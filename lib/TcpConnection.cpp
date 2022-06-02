@@ -17,22 +17,22 @@ TcpConnection::TcpConnection(EventLoop *loop,
                                      : ownerLoop_(loop),
                                      ring_(ring),
                                      name_(name),
-                                     channel_(new Channel(ownerLoop_, ring_, sockfd))
+                                     channel_(new Channel(ring_, sockfd))
 {
     channel_->setReadCallback(std::bind(&TcpConnection::handleRead, this));
     channel_->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
-    channel_->setCloseCallback(std::bind(&TcpConnection::handleClose, this));
 }
 
 void TcpConnection::send(char *buf, int size)  // messageCallback_中调用
 {
+    // TODO: 这一部分移动到Channel中更合适
     sqe_ = io_uring_get_sqe(ring_);
 
     io_uring_prep_send(sqe_, channel_->fd(), buf, size, 0);
     auto info = (struct ConnInfo*)malloc(sizeof(struct ConnInfo));
     info->channel = channel_;
     info->eventType = EVENT_WRITE;
-    info->clientSocket = channel_->fd();
+    info->sockfd = channel_->fd();
     io_uring_sqe_set_data(sqe_, info);
 
     io_uring_submit(ring_);
@@ -41,14 +41,15 @@ void TcpConnection::send(char *buf, int size)  // messageCallback_中调用
 void TcpConnection::connectEstablished()
 {
     setState(kConnected);
-    channel_->enableReading();
+    channel_->addRead();  // 重启读事件
     connectionCallback_(shared_from_this());
 }
 
 void TcpConnection::handleRead()
 {
     struct io_uring_cqe *cqe = channel_->cqe();
-    int bufId = cqe->flags >> 16;
+    auto info = (struct ConnInfo *)cqe->user_data;
+    int bufId = info->bId;
     int size = cqe->res;
     messageCallback_(shared_from_this(), bufs[bufId], size);
 }
@@ -66,11 +67,5 @@ void TcpConnection::handleWrite()
     io_uring_submit(ring_);
 
     // 重启读事件监听
-    channel_->enableReading();
-}
-
-void TcpConnection::handleClose()
-{
-    channel_->disableAll();
-    closeCallback_(shared_from_this());
+    channel_->addRead();
 }
