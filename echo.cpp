@@ -4,6 +4,7 @@
 
 void onConnection(const TcpConnectionPtr& conn)
 {
+    // 什么也不做
 }
 
 void onMessage(const TcpConnectionPtr& conn, char *buf, int size)
@@ -13,7 +14,7 @@ void onMessage(const TcpConnectionPtr& conn, char *buf, int size)
 
 int main()
 {
-    int port = 10001;
+    uint16_t port = 10001;
     EventLoop loop;
 
     TcpServer server(&loop, port);

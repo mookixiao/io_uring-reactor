@@ -17,6 +17,11 @@ EventLoop::EventLoop()
     poller_ = std::make_shared<IOUringPoller>(this, &ring_);
 }
 
+EventLoop::~EventLoop()
+{
+    io_uring_queue_exit(&ring_);
+}
+
 void EventLoop::loop()
 {
     while(true) {

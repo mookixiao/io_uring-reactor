@@ -13,10 +13,11 @@
 char bufs[MAX_CONNECTIONS][MAX_MESSAGE_LEN];
 
 Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
-        : ownerLoop_(loop),
-        ring_(ring),
-        acceptSocket_(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)),
-        acceptChannel_(ring_, acceptSocket_)
+        : loop_(loop),
+          ring_(ring),
+          acceptSocket_(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0)),
+          acceptChannel_(acceptSocket_, ring_),
+          cqe_(nullptr)
 {
     // 准备监听套接字
     int opt = 1;
@@ -24,12 +25,11 @@ Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
         perror("setsockopt");
     }
 
-    struct sockaddr_in addr;
-    bzero(&addr, sizeof addr);
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(port);
-    if (::bind(acceptSocket_, (struct sockaddr*)&addr, sizeof addr) < 0) {
+    bzero(&addr_, sizeof(addr_));
+    addr_.sin_family = AF_INET;
+    addr_.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr_.sin_port = htons(port);
+    if (::bind(acceptSocket_, (struct sockaddr*)&addr_, sizeof(struct sockaddr_in)) < 0) {
         perror("bind");
     }
 
@@ -46,6 +46,17 @@ Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
 
     // 准备Channel
     acceptChannel_.setAcceptCallback(std::bind(&Acceptor::handleNewConnection, this));
+}
+
+std::string Acceptor::toHostPort()
+{
+    char buf[32];
+    char host[INET_ADDRSTRLEN];
+    ::inet_ntop(AF_INET, &addr_.sin_addr, host, sizeof(host));
+    uint16_t port = ::ntohs(addr_.sin_port);
+    snprintf(buf, sizeof(buf), "%s:%u", host, port);
+
+    return buf;
 }
 
 void Acceptor::listen()

@@ -6,5 +6,5 @@ add_subdirectory(lib)
 
 add_executable(echo echo.cpp)
 
-target_include_directories(echo PRIVATE lib)
-target_link_libraries(echo PRIVATE reactor)
+target_include_directories(echo PUBLIC lib)
+target_link_libraries(echo PUBLIC reactor)

@@ -27,8 +27,8 @@ public:
     std::string name() { return name_; }
 
 private:
-    void handleReadComplete();
-    void handleWriteComplete();
+    void handleRead();
+    void handleWrite();
 
     void handleClose();
 

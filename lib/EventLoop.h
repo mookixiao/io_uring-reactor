@@ -24,9 +24,10 @@ public:
     struct io_uring* ring() { return &ring_; };
 
 private:
-    struct io_uring ring_;
     std::shared_ptr<IOUringPoller> poller_;
     ChannelList activeChannels_;
+
+    struct io_uring ring_;
 };
 
 

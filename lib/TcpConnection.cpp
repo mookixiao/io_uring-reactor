@@ -17,10 +17,10 @@ TcpConnection::TcpConnection(EventLoop *loop,
                                      : ownerLoop_(loop),
                                      ring_(ring),
                                      name_(name),
-                                     channel_(new Channel(ring_, sockfd))
+                                     channel_(new Channel(sockfd, ring_))
 {
-    channel_->setReadCallback(std::bind(&TcpConnection::handleReadComplete, this));
-    channel_->setWriteCallback(std::bind(&TcpConnection::handleWriteComplete, this));
+    channel_->setReadCallback(std::bind(&TcpConnection::handleRead, this));
+    channel_->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
 }
 
 void TcpConnection::connectEstablished()
@@ -37,25 +37,17 @@ void TcpConnection::send(char *buf, int size)
 }
 
 // 提供给Channel作为各个事件的回调
-void TcpConnection::handleReadComplete()
+void TcpConnection::handleRead()
 {
-    int bufId = channel_->getCqe()->flags >> 16;
     int size = channel_->getCqe()->res;
 
-    messageCallback_(shared_from_this(), bufs[bufId], size);
+    messageCallback_(shared_from_this(), bufs[channel_->getBId()], size);
 }
 
-void TcpConnection::handleWriteComplete()
+void TcpConnection::handleWrite()
 {
-    // 重置缓冲区
-    sqe_ = io_uring_get_sqe(ring_);
-
-    int bufId = channel_->cqe()->flags >> 16;
-    io_uring_prep_provide_buffers(sqe_, bufs[bufId], MAX_MESSAGE_LEN, 1, BGID, bufId);
-    auto *info = (struct ConnInfo *)channel_->cqe()->user_data;
-    info->eventType = EVENT_SER_BUF_COMPLETE;
-
-    io_uring_submit(ring_);
+    // 设置缓冲区
+    channel_->addBuffer();
 
     // 重启读事件监听
     channel_->addRead();

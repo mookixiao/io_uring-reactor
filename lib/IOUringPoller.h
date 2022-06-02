@@ -14,15 +14,15 @@ class EventLoop;
 
 class IOUringPoller {
 public:
-    IOUringPoller(EventLoop *loop, struct io_uring *ring) : ownerLoop_(loop), ring_(ring) {}
-    ~IOUringPoller();
+    IOUringPoller(EventLoop *loop, struct io_uring *ring) : ownerLoop_(loop), ring_(ring), cqe_(nullptr) {}
 
     void poll(ChannelList& channels);
 
 private:
     EventLoop* ownerLoop_;
+
     struct io_uring* ring_;
-    struct io_uring_cqe *nowCqe_;
+    struct io_uring_cqe *cqe_;
 };
 
 

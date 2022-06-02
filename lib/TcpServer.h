@@ -14,7 +14,7 @@ class EventLoop;
 
 class TcpServer {
 public:
-    TcpServer(EventLoop *loop, int port);
+    TcpServer(EventLoop *loop, uint16_t port);
 
     void start();
 
@@ -28,16 +28,14 @@ private:
     ConnectionCallback connectionCallback_;
     MessageCallback messageCallback_;
 
-    EventLoop *ownerLoop_;
-    struct io_uring *ring_;
+    EventLoop *loop_;
+    Acceptor acceptor_;
+    ConnectionMap connections_;
 
+    std::string name_;
     int connId_;
 
-    // 接受器
-    Acceptor acceptor_;
-
-    // 当前连接
-    ConnectionMap connections_;
+    struct io_uring *ring_;
 };
 
 
