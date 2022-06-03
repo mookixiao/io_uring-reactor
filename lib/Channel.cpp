@@ -11,6 +11,8 @@
 #include "EventLoop.h"
 #include "Limits.h"
 
+#include <iostream>
+
 extern char bufs[][MAX_MESSAGE_LEN];
 
 Channel::Channel(int sockfd, struct io_uring *ring)
@@ -51,14 +53,13 @@ void Channel::handleEvent() {
     }
 }
 
-void Channel::addListen(struct sockaddr_in &peerAddr)  // 针对监听套接字
+void Channel::addListen(struct sockaddr_in &peerAddr, socklen_t *peerAddrLen)  // 针对监听套接字
 {
     info_->eventType = EVENT_ACCEPT;
 
     sqe_ = io_uring_get_sqe(ring_);
 
-    socklen_t peerAddrLen = sizeof(peerAddr);
-    io_uring_prep_accept(sqe_, fd_, (struct sockaddr *)&peerAddr, &peerAddrLen, 0);
+    io_uring_prep_accept(sqe_, fd_, (struct sockaddr *)&peerAddr, peerAddrLen, 0);
     io_uring_sqe_set_data(sqe_, info_);
 
     io_uring_submit(ring_);

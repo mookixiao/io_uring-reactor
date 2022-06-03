@@ -8,16 +8,13 @@
 
 extern char bufs[][MAX_MESSAGE_LEN];
 
-TcpConnection::TcpConnection(EventLoop *loop,
-                             struct io_uring *ring,
+TcpConnection::TcpConnection(struct io_uring *ring,
                              std::string &name,
                              int sockfd,
                              struct sockaddr_in &localAddr,
-                             struct sockaddr_in &peerAddr)
-                                     : ownerLoop_(loop),
-                                     ring_(ring),
+                             struct sockaddr_in &peerAddr) :
                                      name_(name),
-                                     channel_(new Channel(sockfd, ring_))
+                                     channel_(new Channel(sockfd, ring))
 {
     channel_->setReadCallback(std::bind(&TcpConnection::handleRead, this));
     channel_->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
@@ -25,8 +22,7 @@ TcpConnection::TcpConnection(EventLoop *loop,
 
 void TcpConnection::connectEstablished()
 {
-    setState(kConnected);
-    channel_->addRead();  // 重启读事件
+    channel_->addRead();
     connectionCallback_(shared_from_this());
 }
 

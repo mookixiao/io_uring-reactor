@@ -18,7 +18,7 @@
 
 class Acceptor {
 public:
-    explicit Acceptor(EventLoop *loop, struct io_uring *ring, int port);
+    Acceptor(EventLoop *loop, struct io_uring *ring, int port);
 
     void listen();
 
@@ -39,6 +39,7 @@ private:
     Channel acceptChannel_;
 
     struct sockaddr_in newPeerAddr_;
+    socklen_t newPeerAddrLen_;
 
     NewConnectionCallback newConnectionCallback;
 };

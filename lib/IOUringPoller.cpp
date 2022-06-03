@@ -4,6 +4,8 @@
 
 #include "IOUringPoller.h"
 
+#include <iostream>
+
 #include <liburing.h>
 
 #include "Channel.h"
@@ -15,8 +17,8 @@ void IOUringPoller::poll(ChannelList &channels) {
 
     auto info = (struct ConnInfo *)cqe_->user_data;
     Channel *channel = info->channel;
-    channel->setCqe(cqe_);
     channel->setConnInfo(info);
     channel->setEventType(info->eventType);
+    channel->setCqe(cqe_);
     channels.push_back(channel);
 }

@@ -14,7 +14,7 @@ void onMessage(const TcpConnectionPtr& conn, char *buf, int size)
 
 int main()
 {
-    uint16_t port = 10001;
+    uint16_t port = 65421;
     EventLoop loop;
 
     TcpServer server(&loop, port);

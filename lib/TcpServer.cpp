@@ -7,10 +7,10 @@
 
 TcpServer::TcpServer(EventLoop *loop, uint16_t port)
         : loop_(loop),
-          ring_(loop_->ring()),
-          acceptor_(loop_, ring_, port),
-          name_(acceptor_.toHostPort()),
-          connId_(0)
+        ring_(loop->ring()),
+        acceptor_(loop, loop->ring(), port),
+        name_(acceptor_.toHostPort()),
+        connId_(0)
 {
     acceptor_.setNewConnectionCallback(std::bind(&TcpServer::newConnection, this, std::placeholders::_1, std::placeholders::_2));
 }
@@ -34,8 +34,7 @@ void TcpServer::newConnection(int connfd, struct sockaddr_in &peerAddr)  // 在a
     ::getsockname(connfd, (sockaddr *)&localAddr, &localAddrLen);
 
     // 远端
-    TcpConnectionPtr conn(new TcpConnection(
-            loop_, ring_, connName, connfd, localAddr, peerAddr));
+    TcpConnectionPtr conn(new TcpConnection(ring_, connName, connfd, localAddr, peerAddr));
     connections_[connName] = conn;
 
     conn->setConnectionCallback(connectionCallback_);

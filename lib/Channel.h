@@ -21,7 +21,7 @@ public:
     // 监听套接字
     void setAcceptCallback(const AcceptEventCallback& cb) { acceptCallback_ = cb; }
 
-    void addListen(struct sockaddr_in &peerAddr);
+    void addListen(struct sockaddr_in &peerAddr, socklen_t *peerAddrLen);
 
     // 一般套接字
     void setReadCallback(const ReadEventCallback& cb) { readCallback_ = cb; };
