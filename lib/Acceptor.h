@@ -18,7 +18,7 @@
 
 class Acceptor {
 public:
-    Acceptor(EventLoop *loop, struct io_uring *ring, int port);
+    Acceptor(struct io_uring *ring, int port);
 
     void listen();
 
@@ -29,7 +29,6 @@ public:
 private:
     void handleNewConnection();  // 接受新连接
 
-    EventLoop *loop_;
     struct io_uring *ring_;
     struct io_uring_sqe *sqe_;
     struct io_uring_cqe *cqe_;

@@ -36,17 +36,13 @@ void TcpConnection::send(char *buf, int size)
 void TcpConnection::handleRead()
 {
     int size = channel_->getCqe()->res;
-
     messageCallback_(shared_from_this(), bufs[channel_->getBId()], size);
 }
 
 void TcpConnection::handleWrite()
 {
-    // 设置缓冲区
-    channel_->addBuffer();
-
-    // 重启读事件监听
-    channel_->addRead();
+    channel_->addBuffer();  // 设置缓冲区
+    channel_->addRead();  // 重启读事件监听
 }
 
 void TcpConnection::handleClose()

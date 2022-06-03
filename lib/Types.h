@@ -45,8 +45,9 @@ typedef std::function<void ()> CloseEventCallback;
 enum EventType { EVENT_ACCEPT, EVENT_READ, EVENT_WRITE, EVENT_BUF, EVENT_NONE };
 
 struct ConnInfo {
-    Channel *channel;
-    EventType eventType;
+    uint32_t fd;
+    uint16_t eventType;
+    uint16_t bId;
 };
 
 // Socket

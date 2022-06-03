@@ -10,7 +10,7 @@
 #include "Channel.h"
 #include "EventLoop.h"
 
-class TcpConnection : std::enable_shared_from_this<TcpConnection>
+class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 {
 public:
     TcpConnection(struct io_uring *ring, std::string &name,

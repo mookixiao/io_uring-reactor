@@ -13,9 +13,7 @@ class EventLoop;
 
 class Channel {
 public:
-    Channel(int sockfd, struct io_uring *ring);
-    ~Channel();
-
+    Channel(int sockfd, struct io_uring *ring) : fd_(sockfd), ring_(ring), sqe_(nullptr), cqe_(nullptr), bId_(0) {}
     void handleEvent();
 
     // 监听套接字
@@ -32,21 +30,16 @@ public:
     void addWrite(char *buf, int size);
     void addBuffer();
 
-    // 状态
     int getFd() const { return fd_; }
+
+    int getBId() const { return bId_; }
 
     struct io_uring_cqe* getCqe() const { return cqe_; }
     void setCqe(struct io_uring_cqe *cqe) { cqe_ = cqe; }
 
-    int getBId() const { return bId_; }
-
-    struct ConnInfo* getConnInfo() const { return info_; }
-    void setConnInfo(struct ConnInfo *info) { info_ = info; }
-
-    EventType getEventType() const { return eventType_; }
-    void setEventType(EventType type) { eventType_ = type; };
-
 private:
+    void fillConnInfo(unsigned long long int *info, EventType type) const;
+
     AcceptEventCallback acceptCallback_;
 
     ReadEventCallback readCallback_;
@@ -58,10 +51,7 @@ private:
     struct io_uring *ring_;
     struct io_uring_sqe *sqe_;
     struct io_uring_cqe *cqe_;
-    int bId_;
-
-    struct ConnInfo *info_;
-    EventType eventType_;
+    uint16_t bId_;
 };
 
 

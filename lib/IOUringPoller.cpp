@@ -17,8 +17,8 @@ void IOUringPoller::poll(ChannelList &channels) {
 
     auto info = (struct ConnInfo *)cqe_->user_data;
     Channel *channel = info->channel;
-    channel->setConnInfo(info);
     channel->setEventType(info->eventType);
+    channel->setConnInfo(info);
     channel->setCqe(cqe_);
     channels.push_back(channel);
 }

@@ -12,9 +12,8 @@
 
 char bufs[MAX_CONNECTIONS][MAX_MESSAGE_LEN];
 
-Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
-        : loop_(loop),
-          ring_(ring),
+Acceptor::Acceptor(struct io_uring *ring, int port)
+          : ring_(ring),
           acceptSocket_(::socket(AF_INET, SOCK_STREAM, 0)),
           acceptChannel_(acceptSocket_, ring),
           newPeerAddrLen_(sizeof(newPeerAddr_)),
@@ -68,6 +67,7 @@ void Acceptor::listen()
     }
 
     acceptChannel_.addListen(newPeerAddr_, &newPeerAddrLen_);  // 每次有新连接时，远端信息会存放到此peerAddr_中
+    acceptChannel_.submit();
 }
 
 void Acceptor::handleNewConnection()
