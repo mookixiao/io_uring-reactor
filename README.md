@@ -71,24 +71,54 @@ liburing版本：2022年5月25日clone自[Github上axboe的liburing代码仓库]
 ### 3.2 测试结果
 
 > 性能测试程序：[GitHub上haraldh的rust_echo_bench代码仓库](https://github.com/haraldh/rust_echo_bench)
+>
+> 单位：request/sec
 
-#### 使用io_uring的echo服务器
+#### 结果1 - 使用io_uring且实现遵循Reactor架构的echo服务器（自己编写）
 
 > ./echo.cpp
 >
 > * 程序中的void onConnection()是注册到每个class TcpConnection实例上的连接事件回调函数，在每次连接建立、销毁时被调用（一般是输出相关信息），为了防止额外IO操作对测试结果产生影响，测试时此函数函数体为空
+> * 测试过程中服务器偶尔会出现性能大幅度下降，原因不明
 
-<img src='./pic/io_uring性能测试结果.png' width='80%'>
+| bytes\clients | 1     | 50    | 150   | 300   | 500   | 1000  |
+| ------------- | ----- | ----- | ----- | ----- | ----- | ----- |
+| 128 bytes     | 13117 | 43832 | 40941 | 37453 | 33749 | 31232 |
+| 512 bytes     | 12856 | 42195 | 40683 | 36248 | 33586 | 30099 |
+| 1000 bytes    | 12821 | 42650 | 39539 | 34777 | 33476 | 30470 |
 
-#### 基于epoll的echo服务器
+#### 结果2-  使用io_uring的裸echo服务器
 
-> 基于epoll的echo服务器使用[GitHub上frevib的epoll-echo-server代码仓库](https://github.com/frevib/epoll-echo-server)
+> 对比项1，使用参考资料3
 
-<img src='./pic/epoll性能测试结果.png' width='80%'>
+| bytes\clients | 1     | 50    | 150   | 300   | 500   | 1000  |
+| ------------- | ----- | ----- | ----- | ----- | ----- | ----- |
+| 128 bytes     | 13413 | 46096 | 45784 | 44423 | 42771 | 40945 |
+| 512 bytes     | 12502 | 42602 | 46613 | 44911 | 44378 | 44076 |
+| 1000 bytes    | 13645 | 47479 | 48653 | 43669 | 41855 | 43587 |
 
-## 5 参考资料
+#### 结果3 - 基于epoll的裸echo服务器
 
-## 参考资料
+> 对比项2，使用[GitHub上frevib的epoll-echo-server代码仓库](https://github.com/frevib/epoll-echo-server)
+
+<img src='./pic/使用epoll的裸echo服务器性能测试结果.png' width='80%'>
+
+| bytes\clients | 1     | 50    | 150   | 300   | 500   | 1000  |
+| ------------- | ----- | ----- | ----- | ----- | ----- | ----- |
+| 128 bytes     | 12862 | 46930 | 45802 | 43954 | 42714 | 42432 |
+| 512 bytes     | 12856 | 46659 | 44349 | 42123 | 41532 | 41829 |
+| 1000 bytes    | 13122 | 46911 | 44302 | 42601 | 41809 | 42214 |
+
+#### 3.3 结果分析
+
+1. 从结果1和结果2对比可以看出，我自己实现的使用io_uring且遵循Reactor架构实现的echo服务器和只使用了io_uring的裸echo服务器性能相比更弱
+   * 这可能跟为了遵循Reactor架构而衍生出的很多不必要调用有关
+2. 从结果2和结果3对比可以看出，使用io_uring的裸echo服务器和使用epoll的裸echo服务器性能相比几乎相同
+   * 理论上来讲，io_uring性能应该更强，现在这个结果可能跟当前对io_uring的使用并没有开启feat fast poll模式有关
+
+
+
+## 4参考资料
 
 1. [GitHub上chenshuo的muduo代码仓库](https://github.com/chenshuo/muduo)
 2. [GitHub上chenshuo的recipes代码仓库](https://github.com/chenshuo/recipes)
@@ -99,7 +129,7 @@ liburing版本：2022年5月25日clone自[Github上axboe的liburing代码仓库]
 7. [Lord of the io_uring](https://unixism.net/loti/)
 8. [Efficient IO with io_uring](https://kernel.dk/io_uring.pdf)
 
-## 6 TODO
+## 5 TODO
 
 1. 加入多线程支持，借鉴muduo实现one loop per thread
 2. 当前是全局缓存方案，要改成类似muduo中的缓存方案
