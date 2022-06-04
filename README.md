@@ -16,13 +16,13 @@ class TcpConnection：管理已有连接，管理连接套接字对应的Channel
 
 class Channel：管理fd（包括监听套接字、连接套接字）
 
-struct ConnInfo：在io_uring事件提交和接收过程中传递信息
+struct ConnInfo：在io_uring事件提交和接收过程期间传递信息
 
 ## 1.2 主要逻辑
 
 ### 1.2.1 收割事件 - 相当于epoll中的poll操作
 
-从io_uring_wait()返回的struct io_uring_cqe *中获取已完成的事件类型 -> 调用对应事件处理函数进行处理
+从io_uring_wait()获得返回的struct io_uring_cqe * -> 判断已完成事件的类型 -> 调用对应事件处理函数进行处理
 
 * 事件处理函数已经提前设置好，如读回调、写回调、自定义回调等
 
@@ -36,8 +36,6 @@ struct ConnInfo：在io_uring事件提交和接收过程中传递信息
 
 从io_uring_wait()返回的struct io_uring_cqe *中获取新的连接套接字fd -> **通过io_uring_prep_send()使内核接管连接套接字** -> **等待io_uring_wait()返回，即已经有数据被读入到缓冲区中等待处理**
 
-#### 处理连接对应Channel上的事件
-
 ### 1.2.3 timer特有
 
 
@@ -46,17 +44,17 @@ struct ConnInfo：在io_uring事件提交和接收过程中传递信息
 
 ### 2.1 socket
 
-<img src='./' width='80%'>
+<img src='./pic/socket实验结果.png' width='80%'>
 
 ### 2.2 timer
 
-
+<img src='./pic/timer实验结果.png' width='80%'>
 
 ## 3 性能测试
 
 ### 3.1 测试环境
 
-> 测试在虚拟机下进行，结果仅供参考
+> 测试在虚拟机下进行
 
 CPU：Intel Core i5 8300H
 
@@ -72,44 +70,38 @@ liburing版本：2022年5月25日clone自[Github上axboe的liburing代码仓库]
 
 ### 3.2 测试结果
 
+> 性能测试程序：[GitHub上haraldh的rust_echo_bench代码仓库](https://github.com/haraldh/rust_echo_bench)
 
+#### 使用io_uring的echo服务器
 
+> ./echo.cpp
+>
+> * 程序中的void onConnection()是注册到每个class TcpConnection实例上的连接事件回调函数，在每次连接建立、销毁时被调用（一般是输出相关信息），为了防止额外IO操作对测试结果产生影响，测试时此函数函数体为空
 
+<img src='./pic/io_uring性能测试结果.png' width='80%'>
 
-## 4 工具
+#### 基于epoll的echo服务器
 
-## 4 工具
+> 基于epoll的echo服务器使用[GitHub上frevib的epoll-echo-server代码仓库](https://github.com/frevib/epoll-echo-server)
 
-## 工具
-
-1. 性能测试程序：[]()
-2. 作为对比的基于epoll的echo服务器：[]()
+<img src='./pic/epoll性能测试结果.png' width='80%'>
 
 ## 5 参考资料
 
 ## 参考资料
 
-1. [Github上chenshuo的muduo代码仓库](https://github.com/chenshuo/muduo)
-2. [Github上chenshuo的recipes代码仓库](https://github.com/chenshuo/recipes)
-3. [Github上frevib的io_uring-echo-server代码仓库](https://github.com/chenshuo/recipes)
+1. [GitHub上chenshuo的muduo代码仓库](https://github.com/chenshuo/muduo)
+2. [GitHub上chenshuo的recipes代码仓库](https://github.com/chenshuo/recipes)
+3. [GitHub上frevib的io_uring-echo-server代码仓库](https://github.com/chenshuo/recipes)
 4. [长文梳理Muduo库核心代码及优秀编程细节剖析](https://blog.csdn.net/T_Solotov/article/details/124044175?spm=1001.2014.3001.5506)
 5. [AIO 的新归宿：io_uring](https://zhuanlan.zhihu.com/p/62682475)
 6. [浅析开源项目之io_uring](https://zhuanlan.zhihu.com/p/361955546)
 7. [Lord of the io_uring](https://unixism.net/loti/)
 8. [Efficient IO with io_uring](https://kernel.dk/io_uring.pdf)
 
-
-
-
-
 ## 6 TODO
 
-1. 加入多线程支持，实现One Loop Per Thread
-
+1. 加入多线程支持，借鉴muduo实现one loop per thread
 2. 当前是全局缓存方案，要改成类似muduo中的缓存方案
-
 3. 断开连接处理逻辑不完整
-
-   
-
-## 存在的疑问
+4. 添加对io_uring的feast fast poll支持
