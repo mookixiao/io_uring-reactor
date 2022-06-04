@@ -13,8 +13,12 @@ class EventLoop;
 
 class Channel {
 public:
-    Channel(int sockfd, struct io_uring *ring) : fd_(sockfd), ring_(ring), sqe_(nullptr), cqe_(nullptr), bId_(0) {}
+    Channel(EventLoop *loop, int sockfd, struct io_uring *ring)
+            : loop_(loop), fd_(sockfd), ring_(ring), sqe_(nullptr), cqe_(nullptr), bId_(0) {}
+
     void handleEvent();
+
+    void update();
 
     // 监听套接字
     void setAcceptCallback(const AcceptEventCallback& cb) { acceptCallback_ = cb; }
@@ -38,13 +42,15 @@ public:
     void setCqe(struct io_uring_cqe *cqe) { cqe_ = cqe; }
 
 private:
-    void fillConnInfo(unsigned long long int *info, EventType type) const;
+    void fillConnInfo(unsigned long long *info, EventType type) const;
 
     AcceptEventCallback acceptCallback_;
 
     ReadEventCallback readCallback_;
     WriteEventCallback writeCallback_;
     CloseCallback closeCallback_;
+
+    EventLoop *loop_;
 
     int fd_;
 

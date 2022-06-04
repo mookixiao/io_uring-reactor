@@ -15,10 +15,12 @@ void IOUringPoller::poll(ChannelList &channels) {
         perror("io_uring_wait_cqe");
     }
 
-    auto info = (struct ConnInfo *)cqe_->user_data;
-    Channel *channel = info->channel;
-    channel->setEventType(info->eventType);
-    channel->setConnInfo(info);
+    uint32_t fd = reinterpret_cast<struct ConnInfo *>(&cqe_->user_data)->fd;
+    Channel *channel = channels_[fd];
     channel->setCqe(cqe_);
     channels.push_back(channel);
+}
+
+void IOUringPoller::updateChannel(Channel *channel) {
+    channels_[channel->getFd()] = channel;
 }

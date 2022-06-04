@@ -22,6 +22,7 @@ class TcpConnection;
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 typedef std::vector<Channel *> ChannelList;
 typedef std::map<std::string, TcpConnectionPtr> ConnectionMap;  // TcpConnection名字 <-> TcpConnectionPtr
+typedef std::map<uint32_t , Channel*> ChannelMap;
 
 // Events
 const int kReadEvent = 0x01;

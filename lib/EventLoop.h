@@ -21,6 +21,8 @@ public:
 
     void loop();
 
+    void updateChannel(Channel *channel);
+
     struct io_uring* ring() { return &ring_; };
 
 private:

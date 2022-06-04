@@ -8,13 +8,10 @@
 
 extern char bufs[][MAX_MESSAGE_LEN];
 
-TcpConnection::TcpConnection(struct io_uring *ring,
-                             std::string &name,
-                             int sockfd,
-                             struct sockaddr_in &localAddr,
-                             struct sockaddr_in &peerAddr) :
-                                     name_(name),
-                                     channel_(new Channel(sockfd, ring))
+TcpConnection::TcpConnection(EventLoop *loop, int sockfd, struct io_uring *ring,
+        std::string &name, struct sockaddr_in &localAddr, struct sockaddr_in &peerAddr)
+                : channel_(new Channel(loop, sockfd, ring)),
+                  localAddr_(localAddr), peerAddr_(peerAddr)
 {
     channel_->setReadCallback(std::bind(&TcpConnection::handleRead, this));
     channel_->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
@@ -22,6 +19,7 @@ TcpConnection::TcpConnection(struct io_uring *ring,
 
 void TcpConnection::connectEstablished()
 {
+    channel_->update();  // 首次建立连接，需要向Poller注册本Channel
     channel_->addRead();
     connectionCallback_(shared_from_this());
 }

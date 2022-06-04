@@ -18,7 +18,7 @@
 
 class Acceptor {
 public:
-    Acceptor(struct io_uring *ring, int port);
+    Acceptor(EventLoop *loop, struct io_uring *ring, int port);
 
     void listen();
 

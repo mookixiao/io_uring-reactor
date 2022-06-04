@@ -5,6 +5,8 @@
 #ifndef IO_URING_REACTOR_TCPCONNECTION_H
 #define IO_URING_REACTOR_TCPCONNECTION_H
 
+#include <arpa/inet.h>
+
 #include <string>
 
 #include "Channel.h"
@@ -13,8 +15,8 @@
 class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 {
 public:
-    TcpConnection(struct io_uring *ring, std::string &name,
-            int sockfd, struct sockaddr_in &localAddr, struct sockaddr_in &peerAddr);
+    TcpConnection(EventLoop *loop, int sockfd, struct io_uring *ring, std::string &name,
+                  struct sockaddr_in &localAddr, struct sockaddr_in &peerAddr);
 
     void setCloseCallback(const CloseCallback &cb) { closeCallback_ = cb; }
 
@@ -35,7 +37,11 @@ private:
     MessageCallback messageCallback_;
     CloseCallback closeCallback_;
 
+    // TODO: 暂时用不到，后期加入日志功能可能会用到
     std::string name_;
+    struct sockaddr_in localAddr_;
+    struct sockaddr_in peerAddr_;
+
     Channel *channel_;
 };
 

@@ -34,7 +34,8 @@ void TcpServer::newConnection(int connfd, struct sockaddr_in &peerAddr)  // 在a
     ::getsockname(connfd, (sockaddr *)&localAddr, &localAddrLen);
 
     // 远端
-    TcpConnectionPtr conn(new TcpConnection(ring_, connName, connfd, localAddr, peerAddr));
+    TcpConnectionPtr conn(
+            new TcpConnection(loop_, connfd, ring_, connName, localAddr, peerAddr));
     connections_[connName] = conn;
 
     conn->setConnectionCallback(connectionCallback_);
@@ -45,6 +46,7 @@ void TcpServer::newConnection(int connfd, struct sockaddr_in &peerAddr)  // 在a
 
 void TcpServer::removeConnection(const TcpConnectionPtr& conn)
 {
+    // TODO: 断开连接逻辑待完善
     if (connections_.erase(conn->name()) != 1) {
         perror("erase");
     }

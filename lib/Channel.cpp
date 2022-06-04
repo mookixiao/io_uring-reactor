@@ -6,6 +6,7 @@
 
 #include <arpa/inet.h>
 
+#include "EventLoop.h"
 #include "Limits.h"
 
 // Debug
@@ -14,7 +15,7 @@
 extern char bufs[][MAX_MESSAGE_LEN];
 
 void Channel::handleEvent() {
-    auto connInfo = reinterpret_cast<struct ConnInfo *>(cqe_->user_data);
+    auto connInfo = reinterpret_cast<struct ConnInfo *>(&cqe_->user_data);
 
     if (connInfo->eventType == EVENT_ACCEPT) {
         acceptCallback_();
@@ -39,6 +40,7 @@ void Channel::handleEvent() {
     io_uring_cqe_seen(ring_, cqe_);
 }
 
+// TODO: 以下逻辑移到Acceptor更好
 void Channel::addListen(struct sockaddr_in &peerAddr, socklen_t *peerAddrLen)  // 针对监听套接字
 {
     sqe_ = io_uring_get_sqe(ring_);
@@ -47,6 +49,7 @@ void Channel::addListen(struct sockaddr_in &peerAddr, socklen_t *peerAddrLen)  /
     io_uring_submit(ring_);
 }
 
+// TODO: 以下逻辑移到TcpConnection更好
 void Channel::addRead()  // TODO: 使用固定buffer不够灵活
 {
     sqe_ = io_uring_get_sqe(ring_);
@@ -73,10 +76,14 @@ void Channel::addBuffer()  // TODO: 使用固定buffer不够灵活
     io_uring_submit(ring_);
 }
 
-void Channel::fillConnInfo(unsigned long long int *info, EventType type) const
+void Channel::fillConnInfo(unsigned long long *info, EventType type) const
 {
     auto *connInfo = reinterpret_cast<struct ConnInfo *>(info);
     connInfo->fd = fd_;
     connInfo->eventType = type;
     connInfo->bId = bId_;
+}
+
+void Channel::update() {
+    loop_->updateChannel(this);
 }

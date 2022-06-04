@@ -17,9 +17,11 @@ public:
     IOUringPoller(EventLoop *loop, struct io_uring *ring) : ownerLoop_(loop), ring_(ring), cqe_(nullptr) {}
 
     void poll(ChannelList& channels);
+    void updateChannel(Channel *channel);
 
 private:
     EventLoop* ownerLoop_;
+    ChannelMap channels_;  // 建立fd和Channel *的映射关系
 
     struct io_uring* ring_;
     struct io_uring_cqe *cqe_;
