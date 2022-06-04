@@ -9,9 +9,6 @@
 #include "EventLoop.h"
 #include "Limits.h"
 
-// Debug
-#include <iostream>
-
 extern char bufs[][MAX_MESSAGE_LEN];
 
 void Channel::handleEvent() {

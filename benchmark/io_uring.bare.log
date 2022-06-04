@@ -1,0 +1,144 @@
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 1 --duration 10 --length 128`
+Benchmarking: localhost:65421
+1 clients, running 128 bytes, 10 sec.
+
+Speed: 13413 request/sec, 13413 response/sec
+Requests: 134133
+Responses: 134133
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 50 --duration 10 --length 128`
+Benchmarking: localhost:65421
+50 clients, running 128 bytes, 10 sec.
+
+Speed: 46096 request/sec, 46096 response/sec
+Requests: 460969
+Responses: 460968
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 150 --duration 10 --length 128`
+Benchmarking: localhost:65421
+150 clients, running 128 bytes, 10 sec.
+
+Speed: 45784 request/sec, 45784 response/sec
+Requests: 457846
+Responses: 457845
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 300 --duration 10 --length 128`
+Benchmarking: localhost:65421
+300 clients, running 128 bytes, 10 sec.
+
+Speed: 44423 request/sec, 44423 response/sec
+Requests: 444232
+Responses: 444231
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 500 --duration 10 --length 128`
+Benchmarking: localhost:65421
+500 clients, running 128 bytes, 10 sec.
+
+Speed: 42771 request/sec, 42771 response/sec
+Requests: 427712
+Responses: 427710
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 1000 --duration 10 --length 128`
+Benchmarking: localhost:65421
+1000 clients, running 128 bytes, 10 sec.
+
+Speed: 40945 request/sec, 40945 response/sec
+Requests: 409459
+Responses: 409457
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 1 --duration 10 --length 512`
+Benchmarking: localhost:65421
+1 clients, running 512 bytes, 10 sec.
+
+Speed: 12502 request/sec, 12502 response/sec
+Requests: 125021
+Responses: 125020
+    Finished release [optimized] target(s) in 0.01s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 50 --duration 10 --length 512`
+Benchmarking: localhost:65421
+50 clients, running 512 bytes, 10 sec.
+
+Speed: 42602 request/sec, 42602 response/sec
+Requests: 426023
+Responses: 426022
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 150 --duration 10 --length 512`
+Benchmarking: localhost:65421
+150 clients, running 512 bytes, 10 sec.
+
+Speed: 46613 request/sec, 46613 response/sec
+Requests: 466138
+Responses: 466137
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 300 --duration 10 --length 512`
+Benchmarking: localhost:65421
+300 clients, running 512 bytes, 10 sec.
+
+Speed: 44911 request/sec, 44911 response/sec
+Requests: 449113
+Responses: 449112
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 500 --duration 10 --length 512`
+Benchmarking: localhost:65421
+500 clients, running 512 bytes, 10 sec.
+
+Speed: 44378 request/sec, 44378 response/sec
+Requests: 443786
+Responses: 443786
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 1000 --duration 10 --length 512`
+Benchmarking: localhost:65421
+1000 clients, running 512 bytes, 10 sec.
+
+Speed: 44076 request/sec, 44076 response/sec
+Requests: 440769
+Responses: 440768
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 1 --duration 10 --length 1000`
+Benchmarking: localhost:65421
+1 clients, running 1000 bytes, 10 sec.
+
+Speed: 13645 request/sec, 13645 response/sec
+Requests: 136450
+Responses: 136450
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 50 --duration 10 --length 1000`
+Benchmarking: localhost:65421
+50 clients, running 1000 bytes, 10 sec.
+
+Speed: 47479 request/sec, 47479 response/sec
+Requests: 474799
+Responses: 474798
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 150 --duration 10 --length 1000`
+Benchmarking: localhost:65421
+150 clients, running 1000 bytes, 10 sec.
+
+Speed: 48653 request/sec, 48653 response/sec
+Requests: 486537
+Responses: 486536
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 300 --duration 10 --length 1000`
+Benchmarking: localhost:65421
+300 clients, running 1000 bytes, 10 sec.
+
+Speed: 43669 request/sec, 43669 response/sec
+Requests: 436694
+Responses: 436693
+    Finished release [optimized] target(s) in 0.00s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 500 --duration 10 --length 1000`
+Benchmarking: localhost:65421
+500 clients, running 1000 bytes, 10 sec.
+
+Speed: 41855 request/sec, 41855 response/sec
+Requests: 418551
+Responses: 418551
+    Finished release [optimized] target(s) in 0.01s
+     Running `target/release/echo_bench --address 'localhost:65421' --number 1000 --duration 10 --length 1000`
+Benchmarking: localhost:65421
+1000 clients, running 1000 bytes, 10 sec.
+
+Speed: 43587 request/sec, 43587 response/sec
+Requests: 435871
+Responses: 435871
