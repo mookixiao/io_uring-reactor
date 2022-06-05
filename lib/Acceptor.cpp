@@ -15,7 +15,7 @@ char bufs[MAX_CONNECTIONS][MAX_MESSAGE_LEN];
 Acceptor::Acceptor(EventLoop *loop, struct io_uring *ring, int port)
           : ring_(ring),
           acceptSocket_(::socket(AF_INET, SOCK_STREAM, 0)),
-          acceptChannel_(loop, acceptSocket_, ring),
+            acceptChannel_(loop, ring, acceptSocket_),
           newPeerAddrLen_(sizeof(newPeerAddr_)),
           cqe_(nullptr)
 {

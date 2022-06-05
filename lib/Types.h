@@ -42,8 +42,10 @@ typedef std::function<void ()> ReadEventCallback;  // 用于普通Channel
 typedef std::function<void ()> WriteEventCallback;
 typedef std::function<void ()> CloseEventCallback;
 
+typedef std::function<void ()> TimeoutEventCallback;  // 用于定时器Channel
+
 // Requests
-enum EventType { EVENT_ACCEPT, EVENT_READ, EVENT_WRITE, EVENT_BUF, EVENT_NONE };
+enum EventType { EVENT_ACCEPT, EVENT_READ, EVENT_WRITE, EVENT_BUF, EVENT_TIMEOUT, EVENT_NONE };
 
 struct ConnInfo {
     uint32_t fd;

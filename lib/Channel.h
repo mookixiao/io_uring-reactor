@@ -13,7 +13,7 @@ class EventLoop;
 
 class Channel {
 public:
-    Channel(EventLoop *loop, int sockfd, struct io_uring *ring)
+    Channel(EventLoop *loop, struct io_uring *ring, int sockfd = 999)
             : loop_(loop), fd_(sockfd), ring_(ring), sqe_(nullptr), cqe_(nullptr), bId_(0) {}
 
     void handleEvent();
@@ -26,13 +26,18 @@ public:
     void addListen(struct sockaddr_in &peerAddr, socklen_t *peerAddrLen);
 
     // 一般套接字
-    void setReadCallback(const ReadEventCallback& cb) { readCallback_ = cb; };
-    void setWriteCallback(const WriteEventCallback& cb) { writeCallback_ = cb; };
-    void setCloseCallback(const CloseCallback& cb) { closeCallback_ = cb; };
+    void setReadCallback(const ReadEventCallback &cb) { readCallback_ = cb; };
+    void setWriteCallback(const WriteEventCallback &cb) { writeCallback_ = cb; };
+    void setCloseCallback(const CloseEventCallback &cb) { closeCallback_ = cb; };
 
     void addRead();
     void addWrite(char *buf, int size);
     void addBuffer();
+
+    // 定时器
+    void setTimeoutCallback(const TimeoutEventCallback &timeoutEventCallback) { timeoutCallback_ = timeoutEventCallback; };
+
+    void addTimeout(struct __kernel_timespec *time, const TimeoutEventCallback &cb);
 
     int getFd() const { return fd_; }
 
@@ -44,11 +49,15 @@ public:
 private:
     void fillConnInfo(unsigned long long *info, EventType type) const;
 
+    // 套接字
     AcceptEventCallback acceptCallback_;
 
     ReadEventCallback readCallback_;
     WriteEventCallback writeCallback_;
-    CloseCallback closeCallback_;
+    CloseEventCallback closeCallback_;
+
+    // 定时器
+    TimeoutEventCallback timeoutCallback_;
 
     EventLoop *loop_;
 

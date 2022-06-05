@@ -12,23 +12,26 @@
 extern char bufs[][MAX_MESSAGE_LEN];
 
 void Channel::handleEvent() {
-    auto connInfo = reinterpret_cast<struct ConnInfo *>(&cqe_->user_data);
+    auto eventInfo = reinterpret_cast<struct ConnInfo *>(&cqe_->user_data);
 
-    if (connInfo->eventType == EVENT_ACCEPT) {
+    if (eventInfo->eventType == EVENT_ACCEPT) {
         acceptCallback_();
     }
-    else if (connInfo->eventType == EVENT_READ) {
+    else if (eventInfo->eventType == EVENT_READ) {
         bId_ = cqe_->flags >> 16;
         readCallback_();
     }
-    else if (connInfo->eventType == EVENT_WRITE) {
+    else if (eventInfo->eventType == EVENT_WRITE) {
         bId_ = cqe_->flags >> 16;
         writeCallback_();
     }
-    else if (connInfo->eventType == EVENT_BUF) {
+    else if (eventInfo->eventType == EVENT_BUF) {
         if ( cqe_->res < 0) {
             perror("handleEvent: EVENT_BUF");
         }
+    }
+    else if (eventInfo->eventType == EVENT_TIMEOUT) {
+        timeoutCallback_();
     }
     else {
         perror("handleEvent: Unknown Event Type");
@@ -70,6 +73,16 @@ void Channel::addBuffer()  // TODO: 使用固定buffer不够灵活
     sqe_ = io_uring_get_sqe(ring_);
     io_uring_prep_provide_buffers(sqe_, bufs[bId_], MAX_MESSAGE_LEN, 1, BGID, bId_);
     fillConnInfo(&sqe_->user_data, EVENT_BUF);
+    io_uring_submit(ring_);
+}
+
+void Channel::addTimeout(struct __kernel_timespec *time, const TimeoutEventCallback &cb)
+{
+    setTimeoutCallback(cb);
+
+    sqe_ = io_uring_get_sqe(ring_);
+    io_uring_prep_timeout(sqe_, time, 1, IORING_TIMEOUT_ABS);
+    fillConnInfo(&sqe_->user_data, EVENT_TIMEOUT);
     io_uring_submit(ring_);
 }
 

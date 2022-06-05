@@ -42,7 +42,7 @@ private:
     struct sockaddr_in localAddr_;
     struct sockaddr_in peerAddr_;
 
-    Channel *channel_;
+    Channel *connChannel_;
 };
 
 

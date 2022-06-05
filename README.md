@@ -38,17 +38,25 @@ struct ConnInfo：在io_uring事件提交和接收过程期间传递信息
 
 ### 1.2.3 timer特有
 
+#### 建立新超时事件
 
+设置struct __kernel_timespec格式的超时事件 -> **通过io_uring_prep_timeout()使内核接管超时事件** -> **等待io_uring_wait()返回，即已经有数据被读入到缓冲区中等待处理**
 
 ## 2 Channel实验方案
 
 ### 2.1 socket
 
-<img src='./pic/socket实验结果.png' width='80%'>
+> echo.cpp核心代码见附录部分或./echo.cpp
+
+<img src='./pic/echo实验结果.png' width='100%'>
 
 ### 2.2 timer
 
-<img src='./pic/timer实验结果.png' width='80%'>
+> timer.cpp核心代码见附录部分或./timer.cpp
+>
+> * 说明：本实验失败，程序并未在指定超时时间结束后执行回调函数，推测应该是我对io_uring_prep_timeout()中使用的struct __kernel_timespec和需要设置的flags理解有误
+
+<img src='./pic/timer实验结果.png' width='100%'>
 
 ## 3 性能测试
 
@@ -116,8 +124,6 @@ liburing版本：2022年5月25日clone自[Github上axboe的liburing代码仓库]
 2. 从结果2和结果3对比可以看出，使用io_uring的裸echo服务器和使用epoll的裸echo服务器性能相比几乎相同
    * 理论上来讲，io_uring性能应该更强，现在这个结果可能跟当前对io_uring的使用并没有开启feat fast poll模式有关
 
-
-
 ## 4参考资料
 
 1. [GitHub上chenshuo的muduo代码仓库](https://github.com/chenshuo/muduo)
@@ -133,5 +139,63 @@ liburing版本：2022年5月25日clone自[Github上axboe的liburing代码仓库]
 
 1. 加入多线程支持，借鉴muduo实现one loop per thread
 2. 当前是全局缓存方案，要改成类似muduo中的缓存方案
-3. 断开连接处理逻辑不完整
-4. 添加对io_uring的feast fast poll支持
+3. 当前不支持同时存在多个定时器，加入对TimerQueue的支持
+4. 断开连接处理逻辑不完整
+5. 添加对io_uring的feast fast poll支持
+
+## 6 附录
+
+1. echo.cpp核心代码
+
+   ```c++
+   void onConnection(const TcpConnectionPtr& conn)
+   {
+       // 什么也不做
+   }
+   
+   void onMessage(const TcpConnectionPtr& conn, char *buf, int size)
+   {
+       conn->send(buf, size);
+   }
+   
+   int main()
+   {
+       uint16_t port = 65421;
+       EventLoop loop;
+   
+       TcpServer server(&loop, port);
+       server.setConnectionCallback(onConnection);
+       server.setMessageCallback(onMessage);
+       server.start();
+   
+       loop.loop();
+   }
+   ```
+
+2. timer.cpp核心代码
+
+   ```c++
+   void printCurrentTime()
+   {
+       time_t nowTime;
+       struct tm *nowLocalTime;
+       nowTime = time(nullptr);
+       nowLocalTime = localtime(&nowTime);
+       printf("%d-%d-%d %d:%d:%d\n",
+              nowLocalTime->tm_year + 1900, nowLocalTime->tm_mon + 1, nowLocalTime->tm_mday,
+              nowLocalTime->tm_hour, nowLocalTime->tm_min, nowLocalTime->tm_sec);
+   }
+   
+   int main()
+   {
+       EventLoop loop;
+   
+       Timer timer(&loop);
+       printCurrentTime();
+       timer.runAfter(3.5, printCurrentTime);
+   
+       loop.loop();
+   }
+   ```
+
+   
