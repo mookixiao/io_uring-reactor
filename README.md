@@ -81,6 +81,8 @@ liburing版本：2022年5月25日clone自[Github上axboe的liburing代码仓库]
 > 性能测试程序：[GitHub上haraldh的rust_echo_bench代码仓库](https://github.com/haraldh/rust_echo_bench)
 >
 > 单位：request/sec
+>
+> 详细测试log位于：./benchmark
 
 #### 结果1 - 使用io_uring且实现遵循Reactor架构的echo服务器（自己编写）
 
@@ -108,8 +110,6 @@ liburing版本：2022年5月25日clone自[Github上axboe的liburing代码仓库]
 #### 结果3 - 基于epoll的裸echo服务器
 
 > 对比项2，使用[GitHub上frevib的epoll-echo-server代码仓库](https://github.com/frevib/epoll-echo-server)
-
-<img src='./pic/使用epoll的裸echo服务器性能测试结果.png' width='80%'>
 
 | bytes\clients | 1     | 50    | 150   | 300   | 500   | 1000  |
 | ------------- | ----- | ----- | ----- | ----- | ----- | ----- |
